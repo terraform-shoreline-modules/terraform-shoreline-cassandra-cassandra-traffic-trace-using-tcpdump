@@ -1,0 +1,134 @@
+{
+  "name": "cassandra_traffic_trace_using_tcpdump",
+  "description": "This incident type involves tracing the network traffic associated with Cassandra, a distributed NoSQL database management system. The purpose of this trace is to diagnose any issues or potential problems with the database's performance, security, or availability. Tcpdump, a command-line packet analyzer, is commonly used to capture and analyze this network traffic data. This analysis can help identify issues such as slow query response times, network latency, or security threats.",
+  "params": [
+    {
+      "name": "PATH_TO_CASSANDRA_YAML_FILE",
+      "value": ""
+    },
+    {
+      "name": "CASSANDRA_PORT",
+      "value": ""
+    },
+    {
+      "name": "INTERFACE",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Cassandra Traffic Trace Using tcpdump\nThis incident type involves tracing the network traffic associated with Cassandra, a distributed NoSQL database management system. The purpose of this trace is to diagnose any issues or potential problems with the database's performance, security, or availability. Tcpdump, a command-line packet analyzer, is commonly used to capture and analyze this network traffic data. This analysis can help identify issues such as slow query response times, network latency, or security threats."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Capture Cassandra traffic on a specific network interface"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo tcpdump -i ${INTERFACE} port ${CASSANDRA_PORT} -w cassandra_traffic.pcap`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## View captured traffic in real-time"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo tcpdump -i ${INTERFACE} port ${CASSANDRA_PORT} -A`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Cassandra is running"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `nodetool status`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Cassandra's system log for errors"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `tail -f /var/log/cassandra/system.log`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Monitor Cassandra's performance metrics (requires nodetool)"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `watch -n 1 nodetool cfstats`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Analyze captured traffic with Wireshark"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `wireshark cassandra_traffic.pcap`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Cassandra's JVM heap usage (requires nodetool)"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `nodetool info | grep HeapMemoryUsage`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the Cassandra cluster is properly configured. Ensure that there are no configuration errors in the Cassandra.yaml file."
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_cassandra_config_check($PATH_TO_CASSANDRA_YAML_FILE)"
+    }
+  ]
+}
